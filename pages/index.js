@@ -22,6 +22,30 @@ function ProfileSidebar(props) {
   )  
 }
 
+function ProfileRelationsBox(props) {
+  return (
+    <ProfileRelationsBoxWrapper>
+            <h2 className="smallTitle">
+              {props.title} ({props.followers.length})
+            </h2>
+            <ul>
+              {props.followers.map((followers, i) => {
+                if (i < 6) return (
+                  <li key={followers.id}>
+                    <a href={`https://github.com/${followers.login}`} key={followers}>
+                      <img src={`${followers.avatar_url}`} alt={`${followers}`}/>
+                      <span>{followers.login}</span>
+                    </a>
+                  </li>    
+                )
+              })}
+
+            </ul>
+    </ProfileRelationsBoxWrapper>
+
+  )
+}
+
 export default function Home() {
   const githubUser = 'gabsgc';
   const [comunidades, setComunidades] = React.useState([{
@@ -38,6 +62,19 @@ export default function Home() {
     'marcobrunodev',
     'felipefialho'
   ]
+
+  // pegar array de dados do github
+  const [seguidores, setSeguidores] = React.useState([]);
+
+  React.useEffect(function () {
+    fetch('https://api.github.com/users/gabsgc/followers')
+      .then(function (respostaDoServidor) {
+        return respostaDoServidor.json()
+      })
+      .then(function (respostaCompleta){
+        setSeguidores(respostaCompleta);
+      })
+  }, [])
 
   return (
     <>
@@ -79,9 +116,9 @@ export default function Home() {
             }}>
               <div>
                 <input
-                  placeholder="Qual vai ser o nome da sua comunidade?"
+                  placeholder="Digite o nome da sua comunidade"
                   name="title"
-                  aria-label="Qual vai ser o nome da sua comunidade?"
+                  aria-label="Digite o nome da sua comunidade"
                   type="text"
                 />
               </div>
@@ -89,7 +126,15 @@ export default function Home() {
                 <input
                   placeholder="Coloque uma URL para usarmos de capa"
                   name="image"
-                  aria-label="Qual vai ser o nome da sua comunidade?"
+                  aria-label="Coloque uma URL para usarmos de capa"
+                />
+              </div>
+
+              <div>
+                <input
+                  placeholder="Informe o link para acessar a sua comunidade"
+                  name="link"
+                  aria-label="Informe o link para acessar a sua comunidade"
                 />
               </div>
 
@@ -117,6 +162,8 @@ export default function Home() {
                 })}
             </ul>
           </ProfileRelationsBoxWrapper>
+
+          <ProfileRelationsBox title="Seguidores" followers={seguidores}/>
 
           <ProfileRelationsBoxWrapper>
             <h2 className="smallTitle">
