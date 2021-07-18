@@ -1,5 +1,6 @@
 <div align="center">
-    </br><p> Project Alurakut created during the Imersão React of Alura. 🤿 </br>
+    <img src="https://alurakut.vercel.app/logo.svg" alt="Alurakut" width="35%">
+    </br><p> <a href="https://alurakut-gabsgc.vercel.app/login">Project Alurakut</a> created during the Imersão React of Alura. 🤿 </br>
     Built with 💙 by Gabriela Garcia.</p>
 </div>
 
