@@ -29,10 +29,10 @@ function ProfileRelationsBox(props) {
               {props.title} ({props.followers.length})
             </h2>
             <ul>
-              {props.followers.map((followers, i) => {
-                if (i < 6) return (
+              {props.followers.slice(0,6).map((followers, i) => {
+                return (
                   <li key={followers.id}>
-                    <a href={`https://github.com/${followers.login}`} key={followers}>
+                    <a href={`https://github.com/${followers.login}`} target="_blank">
                       <img src={`${followers.avatar_url}`} alt={`${followers}`}/>
                       <span>{followers.login}</span>
                     </a>
@@ -48,11 +48,29 @@ function ProfileRelationsBox(props) {
 
 export default function Home() {
   const githubUser = 'gabsgc';
-  const [comunidades, setComunidades] = React.useState([{
-    id: '1',
-    title: 'Eu odeio acordar cedo',
-    image: 'https://alurakut.vercel.app/capa-comunidade-01.jpg'
-  }]);
+  const [comunidades, setComunidades] = React.useState([]);
+
+  fetch('https://graphql.datocms.com/', {
+    method: 'POST',
+    headers: {
+      'Authorization': '4b33f354ce5b07bab07f9d73f278a8',
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify({"query": `query {
+      allCommunities {
+        nome
+        id
+        imagemUrl
+        link
+      }
+    }`})
+  })
+  .then((response) => response.json())
+  .then((respostaCompleta) => {
+    const communitiesFromDato = respostaCompleta.data.allCommunities;
+    setComunidades(communitiesFromDato);
+  })
 
   const pessoas = [
     'juunegreiros',
@@ -60,7 +78,7 @@ export default function Home() {
     'peas',
     'rafaballerini',
     'marcobrunodev',
-    'felipefialho'
+    'felipefialho',
   ]
 
   // pegar array de dados do github
@@ -100,19 +118,33 @@ export default function Home() {
             <h3 className="subTitle"> 
               O que você deseja fazer?
             </h3>
-            <form onSubmit={function handleCreateCommunity(e){
+            <form id="community-form" 
+              onSubmit={function handleCreateCommunity(e){
               e.preventDefault();
-              console.log(e);
               const dadosForm = new FormData(e.target);
 
               const comunidade = {
-                id: new Date().toISOString(),
-                title: dadosForm.get('title'),
-                image: dadosForm.get('image'),
+                nome: dadosForm.get('name'),
+                imagemUrl: dadosForm.get('image'),
+                link: dadosForm.get('link'),
               }
 
-              const comunidadesAtualizadas = [...comunidades, comunidade];
-              setComunidades(comunidadesAtualizadas);
+              fetch('/api/comunidades', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(comunidade)
+              })
+              .then(async (response) => {
+                const dados = await response.json();
+                console.log(dados.registroCriado);
+                const comunidade = dados.registroCriado;
+                const comunidadesAtualizadas = [...comunidades, comunidade];
+                setComunidades(comunidadesAtualizadas);
+              })
+
+              document.getElementById('community-form').reset();
             }}>
               <div>
                 <input
@@ -150,12 +182,12 @@ export default function Home() {
               Comunidades ({comunidades.length})
             </h2>
             <ul>
-              {comunidades.map((itemAtual) => {
+              {comunidades.slice(0,6).map((itemAtual) => {
                   return (
                     <li key={itemAtual.id}>
-                      <a href={`/users/${itemAtual.title}`} key={itemAtual}>
-                        <img src={`${itemAtual.image}`} alt={`${itemAtual}`}/>
-                        <span>{itemAtual.title}</span>
+                      <a href={`${itemAtual.link}`} target='_blank'>
+                        <img src={`${itemAtual.imagemUrl}`} alt={`${itemAtual.nome}`}/>
+                        <span>{itemAtual.nome}</span>
                       </a>
                     </li>
                   )
@@ -171,7 +203,7 @@ export default function Home() {
             </h2>
             
             <ul>
-              {pessoas.map((itemAtual) => {
+              {pessoas.slice(0,6).map((itemAtual) => {
                 return (
                   <li key={itemAtual}>
                     <a href={`/users/${itemAtual}`} key={itemAtual}>
